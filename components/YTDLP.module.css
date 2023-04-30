@@ -1,0 +1,37 @@
+.main {
+  padding: 20px 20px 60px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.hr {
+  border: none;
+  border-bottom: 1px solid #efefef;
+  margin: 3em auto;
+}
+.section-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.section-description {
+  margin-bottom: 2rem;
+}
+
+.step {
+  margin-bottom: 1.5rem;
+}
+
+.step .step-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.step pre {
+  background-color: #f7fafc;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  margin-bottom: 0.5rem;
+}
