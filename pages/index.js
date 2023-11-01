@@ -1,71 +1,55 @@
-import { useCallback, useEffect, useState } from 'react'
-import Button from '../components/Button'
-import ClickCount from '../components/ClickCount'
-import styles from '../components/YTDLP.module.css'
+import { useState } from 'react';
+import axios from 'axios';
 
-function throwError() {
-  console.log(
-    // The function body() is not defined
-    document.body()
-  )
-}
+export default function Home() {
+  const [token, setToken] = useState('');
+  const [repos, setRepos] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-function Home() {
-  const [count, setCount] = useState(0)
-  const increment = useCallback(() => {
-    setCount((v) => v + 1)
-  }, [setCount])
-
-  useEffect(() => {
-    const r = setInterval(() => {
-      increment()
-    }, 1000)
-
-    return () => {
-      clearInterval(r)
+  const fetchRepos = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('https://api.github.com/user/repos', {
+        headers: { Authorization: `token ${token}` },
+      });
+      setRepos(response.data.filter(repo => !repo.private));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-  }, [increment])
+  };
+
+  const makePrivate = async (repo) => {
+    try {
+      await axios.patch(`https://api.github.com/repos/${repo.full_name}`, {
+        private: true,
+      }, {
+        headers: { Authorization: `token ${token}` },
+      });
+      setRepos(repos.filter(r => r.id !== repo.id));
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
-    <main className={styles.main}>
-      <h1>Fast Refresh Demo</h1>
-      <p>
-        Fast Refresh is a Next.js feature that gives you instantaneous feedback
-        on edits made to your React components, without ever losing component
-        state.
-      </p>
-      <hr className={styles.hr} />
-      <div>
-        <p>
-          Auto incrementing value. The counter won't reset after edits or if
-          there are errors.
-        </p>
-        <p>Current value: {count}</p>
-      </div>
-      <hr className={styles.hr} />
-      <div>
-        <p>Component with state.</p>
-        <ClickCount />
-      </div>
-      <hr className={styles.hr} />
-      <div>
-        <p>
-          The button below will throw 2 errors. You'll see the error overlay to
-          let you know about the errors but it won't break the page or reset
-          your state.
-        </p>
-        <Button
-          onClick={(e) => {
-            setTimeout(() => document.parentNode(), 0)
-            throwError()
-          }}
-        >
-          Throw an Error
-        </Button>
-      </div>
-      <hr className={styles.hr} />
-    </main>
-  )
+    <div>
+      <label>
+        GitHub Token:
+        <input type="text" value={token} onChange={e => setToken(e.target.value)} />
+      </label>
+      <button onClick={fetchRepos} disabled={loading}>
+        {loading ? 'Loading...' : 'Fetch Repos'}
+      </button>
+      <ul>
+        {repos.map(repo => (
+          <li key={repo.id}>
+            {repo.name}
+            <button onClick={() => makePrivate(repo)}>Make Private</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
-
-export default Home
